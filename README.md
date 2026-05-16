@@ -4,7 +4,6 @@
 
 
 ### AIM:
-## Aim
 To analyze and forecast the **accuracy trend over years** using the **Holt-Winters Exponential Smoothing method** by performing data preprocessing, scaling, seasonal decomposition, model training, evaluation, and future prediction using Python.
 
 ### ALGORITHM:
