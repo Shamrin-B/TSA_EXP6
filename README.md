@@ -1,5 +1,5 @@
 # Ex.No: 6               HOLT WINTERS METHOD
-### Date: 
+### Date: 20.05.2026
 
 
 
@@ -18,7 +18,155 @@ datetime, and perform some initial data exploration
 Winters model to the entire dataset and make future predictions
 9. You plot the original sales data and the predictions
 ### PROGRAM:
+```
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Load the dataset and perform data exploration
+data = pd.read_csv('/content/gold_rate_history.csv')
+
+# Convert Date column into datetime format
+data['Date'] = pd.to_datetime(data['Date'])
+
+# Set Date as index
+data.set_index('Date', inplace=True)
+
+# Keep only required column
+data = data[['Standard Gold (22 K)']]
+
+# Convert yearly average
+data = data.resample('YE').mean()
+
+# Plot original data
+data.plot()
+
+plt.title('Gold Rate Over Years')
+
+plt.xlabel('Year')
+
+plt.ylabel('Gold Rate')
+
+plt.show()
+
+# Scale the data
+scaler = MinMaxScaler()
+
+scaled_data = pd.Series(
+    scaler.fit_transform(
+        data['Standard Gold (22 K)'].values.reshape(-1, 1)
+    ).flatten(),
+    index=data.index
+)
+
+# Plot scaled data
+scaled_data.plot()
+
+plt.title('Scaled Gold Rate Data')
+
+plt.xlabel('Year')
+
+plt.ylabel('Scaled Gold Rate')
+
+plt.show()
+
+# Check seasonality
+decomposition = seasonal_decompose(
+    data['Standard Gold (22 K)'],
+    model="additive",
+    period=2
+)
+
+decomposition.plot()
+
+plt.show()
+
+# Split train and test data
+scaled_data = scaled_data + 1
+
+train_data = scaled_data[:int(len(scaled_data) * 0.8)]
+
+test_data = scaled_data[int(len(scaled_data) * 0.8):]
+
+# Create Holt-Winters model
+model_add = ExponentialSmoothing(
+    train_data,
+    trend='add',
+    seasonal='mul',
+    seasonal_periods=2
+).fit()
+
+# Predict test data
+test_predictions_add = model_add.forecast(
+    steps=len(test_data)
+)
+
+# Plot train, test and predictions
+ax = train_data.plot()
+
+test_predictions_add.plot(ax=ax)
+
+test_data.plot(ax=ax)
+
+ax.legend([
+    "train_data",
+    "test_predictions",
+    "test_data"
+])
+
+ax.set_title('Visual Evaluation')
+
+plt.xlabel('Year')
+
+plt.ylabel('Gold Rate')
+
+plt.show()
+
+# Evaluate model
+print(
+    "RMSE:",
+    np.sqrt(
+        mean_squared_error(
+            test_data,
+            test_predictions_add
+        )
+    )
+)
+
+# Create final model
+final_model = ExponentialSmoothing(
+    scaled_data,
+    trend='add',
+    seasonal='mul',
+    seasonal_periods=2
+).fit()
+
+# Predict future data
+final_predictions = final_model.forecast(steps=3)
+
+# Plot final predictions
+ax = scaled_data.plot()
+
+final_predictions.plot(ax=ax)
+
+ax.legend([
+    "Gold Rate Data",
+    "Future Predictions"
+])
+
+ax.set_xlabel('Year')
+
+ax.set_ylabel('Gold Rate')
+
+ax.set_title('Gold Rate Prediction')
+
+plt.show()
+```
 ### OUTPUT:
 
 
@@ -26,7 +174,17 @@ TEST_PREDICTION
 
 
 
+<img width="584" height="455" alt="image" src="https://github.com/user-attachments/assets/147225fd-2767-4c38-8ccb-7aae715902b2" />
+
+
+
 FINAL_PREDICTION
+
+
+
+
+<img width="576" height="455" alt="image" src="https://github.com/user-attachments/assets/ec60d557-4764-411b-8f2e-783563bac017" />
+
 
 ### RESULT:
 Thus the program run successfully based on the Holt Winters Method model.
