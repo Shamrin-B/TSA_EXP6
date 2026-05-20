@@ -128,7 +128,7 @@ ax.set_title('Accuracy Prediction')
 
 plt.show()
 ```
-### OUTPUT:
+### OUTPUT: 
 
 
 TEST_PREDICTION
